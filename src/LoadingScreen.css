@@ -1,0 +1,48 @@
+/* src/components/LoadingScreen.css */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999; /* Certifique-se de que a tela de carregamento esteja acima de outros componentes */
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Fundo escuro e transparente */
+  z-index: 1; /* Coloca a sobreposição abaixo da logo */
+}
+
+.pulse {
+  z-index: 2; /* A logo deve estar acima da sobreposição */
+  animation: pulse-animation 3s infinite, fade-animation 5s infinite; /* Adiciona a nova animação de fade */
+}
+
+@keyframes pulse-animation {
+  0%, 100% {
+    transform: scale(1); /* Mantém o tamanho original no início e no final */
+  }
+  50% {
+    transform: scale(1.1); /* Aumenta para 110% no meio da animação */
+  }
+}
+
+@keyframes fade-animation {
+  0%, 100% {
+    opacity: 1; /* Opacidade total no início e no final */
+  }
+  25% {
+    opacity: 0.5; /* Opacidade reduzida para 70% */
+  }
+  50% {
+    opacity: 0.8; /* Opacidade reduzida para 40% */
+  }
+}
