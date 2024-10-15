@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       animation: {
-        pulse: 'pulse 1.5s infinite', 
+        pulse: 'pulse 1.5s ease-in-out infinite', 
       },
       keyframes: {
         pulse: {
