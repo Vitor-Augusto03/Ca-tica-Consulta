@@ -4,41 +4,40 @@ export async function fetchApi(
   url,          // string: o endpoint da API
   method,       // string: 'GET' | 'POST' | 'DELETE', etc.
   body = null,  // objeto (se houver): dados que serão enviados
-  authToken = null  // string: token de autenticação (opcional)
+  authToken = undefined // string opcional: token de autenticação
 ) {
   const fullUrl = BACKEND_URL + url;
 
+  // Validar método HTTP
+  const validMethods = ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'];
+  if (!validMethods.includes(method)) {
+    throw new Error('Método HTTP inválido');
+  }
+
   // Definindo os headers
   const headers = {
-    'Accept': 'application/json',
+    'Content-Type': body ? 'application/json' : undefined, // Adiciona Content-Type apenas se houver body
+    ...(authToken && { 'Authorization': `Bearer ${authToken}` }) // Adiciona Authorization se o token estiver presente
   };
 
-  // Se houver um corpo, adicionar o cabeçalho 'Content-Type'
-  if (body) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  // Se o token estiver presente, adicionar o cabeçalho de autorização
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
-  }
-
   try {
-    const response = await fetch(fullUrl, {
+    // Configuração da requisição
+    const fetchOptions = {
       method,
       headers,
-      body: body ? JSON.stringify(body) : null,
-    });
+      ...(body && { body: JSON.stringify(body) }), // Adiciona body apenas se houver
+    };
 
-    // Verificar se a resposta é OK (status 200-299)
+    const response = await fetch(fullUrl, fetchOptions);
+
     if (!response.ok) {
-      throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+      const errorMessage = await response.text(); // Lê a mensagem de erro do corpo da resposta
+      throw new Error(`Erro na requisição: ${response.status} ${response.statusText} - ${errorMessage}`);
     }
 
-    // Tentar converter a resposta em JSON
-    return await response.json();
+    return response.json(); // Retorna a resposta JSON
   } catch (error) {
     console.error("Erro ao fazer a requisição:", error);
-    throw error;  // Repassar o erro para ser tratado em outros lugares
+    throw error; // Repassar o erro para ser tratado em outros lugares
   }
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; // Importando useNavigate
 import { fetchApi } from '../../lib/utils';
 import Navbar from "../Navbar"
 
@@ -9,12 +8,22 @@ const MeusAgendamentos = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [loading, setLoading] = useState(false); // Estado para controle do loader
+  const [loadingPagina, setLoadingPagina] = useState(true);
+  
+  useEffect(() => {
+    // Timeout de 3 segundos para o efeito de carregamento geral
+    const timeout = setTimeout(() => {
+      setLoadingPagina(false);
+    }, 3000); // Defina o tempo que deseja para o efeito de carregamento
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Função para buscar agendamentos
   const fetchAgendamentos = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetchApi('listarAgendamentos', 'GET', null, token);
+      const response = await fetchApi('api/agendamentos', 'GET', null, token);
       setAgendamentos(response);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
@@ -107,6 +116,13 @@ const MeusAgendamentos = () => {
           ))
         )}
       </div>
+      {loadingPagina && (
+        <div className="absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-60 flex items-center justify-center z-50">
+          <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-900 animate-pulse font-roboto">
+            Consulta Caótica
+          </h1>
+        </div>
+      )}
 
     </motion.div>
   );
