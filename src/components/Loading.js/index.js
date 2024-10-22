@@ -40,13 +40,7 @@ const Loading = ({ animationType }) => {
       animate={animationType === 'fadeIn' ? 'fadeIn' : animationType === 'slideIn' ? 'slideIn' : animationType === 'rotate' ? 'rotate' : 'scalePulse'} // Seleciona a animação baseada no tipo
       exit={animationType === 'fadeOut' ? 'fadeOut' : 'slideOut'} // Condicional para animação de saída
     >
-      <motion.img
-        src={`${process.env.PUBLIC_URL}/LogoCaotica.png`} // Certifique-se de que este caminho esteja correto
-        alt="Loading..."
-        className="w-32 h-32"
-        animate={animationType === 'scalePulse' ? 'scalePulse' : {}}
-      />
-    </motion.div>
+   </motion.div>
   );
 };
 

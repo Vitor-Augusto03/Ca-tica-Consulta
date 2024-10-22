@@ -1,11 +1,13 @@
 import React from "react";
 import RoutesApp from "./routes";
-import { AuthProvider } from "./contexts/auth"
+import { ToastContainer } from "react-toastify"; // Importando o ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Importando o CSS do Toastify
 
 const App = () => (
-  <AuthProvider>
+  <>
+    <ToastContainer /> 
     <RoutesApp />
-  </AuthProvider>
+  </>
 );
 
 export default App;

@@ -3,8 +3,7 @@ export const BACKEND_URL = 'http://localhost:3001/';
 export async function fetchApi(
   url,          // string: o endpoint da API
   method,       // string: 'GET' | 'POST' | 'DELETE', etc.
-  body = null,  // objeto (se houver): dados que serão enviados
-  authToken = undefined // string opcional: token de autenticação
+  body = null   // objeto (se houver): dados que serão enviados
 ) {
   const fullUrl = BACKEND_URL + url;
 
@@ -17,7 +16,6 @@ export async function fetchApi(
   // Definindo os headers
   const headers = {
     'Content-Type': body ? 'application/json' : undefined, // Adiciona Content-Type apenas se houver body
-    ...(authToken && { 'Authorization': `Bearer ${authToken}` }) // Adiciona Authorization se o token estiver presente
   };
 
   try {

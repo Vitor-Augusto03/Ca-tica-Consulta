@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../Navbar";
-import { ClipLoader, BeatLoader } from 'react-spinners';
+import { ClipLoader, BeatLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom"; // Importando useNavigate
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AgendarConsulta = () => {
   const [medicos, setMedicos] = useState([]);
@@ -14,15 +17,15 @@ const AgendarConsulta = () => {
   const [loadingMedicos, setLoadingMedicos] = useState(true);
   const [loadingAgendamento, setLoadingAgendamento] = useState(false);
   const [error, setError] = useState(null);
-  const [loadingPagina, setLoadingPagina] = useState(true); // Estado de carregamento geral
+  const [loadingPagina, setLoadingPagina] = useState(true);
+  const [modalAberto, setModalAberto] = useState(false);
 
-  const token = localStorage.getItem("token");
+  const navigate = useNavigate(); // Inicializando useNavigate
 
   useEffect(() => {
-    // Timeout de 3 segundos para o efeito de carregamento geral
     const timeout = setTimeout(() => {
       setLoadingPagina(false);
-    }, 3000); // Defina o tempo que deseja para o efeito de carregamento
+    }, 3000);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -74,7 +77,9 @@ const AgendarConsulta = () => {
 
   const formatarData = (dataISO) => {
     const data = new Date(dataISO);
-    return `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+    return `${String(data.getDate()).padStart(2, "0")}/${String(
+      data.getMonth() + 1
+    ).padStart(2, "0")}/${data.getFullYear()}`;
   };
 
   const handleAgendarConsulta = async () => {
@@ -87,12 +92,16 @@ const AgendarConsulta = () => {
       !horarioConsulta ||
       !especialidade
     ) {
-      alert("Por favor, preencha todos os campos.");
+      toast.error("Por favor, preencha todos os campos.", {
+        position: "top-right",
+      });
       return;
     }
 
     if (!validarCPF(cpfPaciente)) {
-      alert("CPF inválido. Por favor, insira um CPF com 11 dígitos.");
+      toast.error("CPF inválido. Por favor, insira um CPF com 11 dígitos.", {
+        position: "top-right",
+      });
       return;
     }
 
@@ -104,9 +113,9 @@ const AgendarConsulta = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
+            nome: nomePaciente,
             cpf: cpfPaciente,
             medicoId: especialidade,
             data: dataConsulta,
@@ -121,49 +130,77 @@ const AgendarConsulta = () => {
         throw new Error(responseError.message || "Erro ao agendar consulta");
       }
 
-      alert("Consulta agendada com sucesso!");
+      toast.success("Consulta agendada com sucesso!", {
+        position: "top-right",
+      });
+      setModalAberto(true);
     } catch (error) {
       console.error("Erro ao agendar consulta:", error);
-      alert(error.message || "Erro ao agendar consulta. Tente novamente.");
+      toast.error(
+        error.message || "Erro ao agendar consulta. Tente novamente.",
+        {
+          position: "top-right",
+        }
+      );
     } finally {
       setLoadingAgendamento(false);
     }
   };
 
   const handleCpfChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ""); // Permite apenas números
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 11) {
       setCpfPaciente(value);
     }
   };
 
+  const fecharModal = () => {
+    setModalAberto(false);
+  };
+
+  const irParaMeusAgendamentos = () => {
+    navigate("/meus-agendamentos"); // Redireciona para a página de Meus Agendamentos
+  };
+
+  const marcarOutraConsulta = () => {
+    fecharModal();
+    setNomePaciente("");
+    setCpfPaciente("");
+    setDataConsulta("");
+    setHorarioConsulta("");
+    setEspecialidade("");
+  };
+
   return (
     <motion.div
-      className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-gray-300 to-gray-300 p-8 relative"
+      className="flex flex-col items-center justify-center min-h-screen bg-green-800 p-8 relative"
       initial={{ opacity: 0, x: -100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 100 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Navbar permanece acima */}
       <Navbar />
-      <h1
-        className="text-4xl font-bold text-white mb-8"
-        initial={{ y: -50 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <h1 className="text-4xl font-extrabold text-white mb-8">
         Agendar Consulta
       </h1>
-
-      <div className="flex flex-col text-black font-bold space-y-4 w-full max-w-md">
+      <div className="flex flex-col text-gray-100 font-semibold space-y-4 w-full max-w-md">
         <label>
           SEU NOME:
           <input
             type="text"
             value={nomePaciente}
-            onChange={(e) => setNomePaciente(e.target.value)}
-            className="w-full p-2 mt-1 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            onChange={(e) => {
+              const valor = e.target.value
+                .toLowerCase()
+                .split(" ")
+                .map(
+                  (palavra) =>
+                    palavra.charAt(0).toUpperCase() + palavra.slice(1)
+                )
+                .join(" ");
+              setNomePaciente(valor);
+            }}
+            className="w-full font-normal text-black p-2 mt-1 border rounded-lg border-gray-300 focus:outline-none "
           />
         </label>
 
@@ -172,9 +209,9 @@ const AgendarConsulta = () => {
           <input
             type="text"
             value={cpfPaciente}
-            onChange={handleCpfChange} // Usando a nova função de mudança
-            maxLength={11} // Limita a 11 dígitos
-            className="w-full p-2 mt-1 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            onChange={handleCpfChange}
+            maxLength={11}
+            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
           />
         </label>
 
@@ -188,7 +225,7 @@ const AgendarConsulta = () => {
             <select
               onChange={(e) => setEspecialidade(e.target.value)}
               value={especialidade}
-              className="w-full p-2 mt-1 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+              className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
             >
               <option value="">Selecione um médico</option>
               {medicos.map((medico) => (
@@ -201,39 +238,83 @@ const AgendarConsulta = () => {
         </label>
 
         <label>
-          DATA E HORÁRIO:
+          DATA:
           <select
-            onChange={(e) => {
-              const [data, horario] = e.target.value.split(" - ");
-              setDataConsulta(data);
-              setHorarioConsulta(horario);
-            }}
-            value={dataConsulta ? `${dataConsulta} - ${horarioConsulta}` : ""}
-            className="w-full p-2 mt-1 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            onChange={(e) => setDataConsulta(e.target.value)}
+            value={dataConsulta}
+            className="w-full p-2 text-black mt-1 border rounded-lg border-gray-300 focus:outline-none "
           >
             <option value="">Selecione uma data</option>
-            {sugestoes.map((sugestao) => (
-              <option
-                key={`${sugestao.data}-${sugestao.horario}`}
-                value={`${sugestao.data} - ${sugestao.horario}`}
-              >
-                {formatarData(sugestao.data)} - {sugestao.horario}
+            {sugestoes.map((sugestao, index) => (
+              <option key={index} value={sugestao.data}>
+                {formatarData(sugestao.data)}
               </option>
             ))}
           </select>
         </label>
 
-        <motion.button
+        <label>
+          HORÁRIO:
+          <select
+            onChange={(e) => setHorarioConsulta(e.target.value)}
+            value={horarioConsulta}
+            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+          >
+            <option value="">Selecione um horário</option>
+            {sugestoes
+              .filter((sugestao) => sugestao.data === dataConsulta)
+              .map((sugestao, index) => (
+                <option key={index} value={sugestao.horario}>
+                  {sugestao.horario}
+                </option>
+              ))}
+          </select>
+        </label>
+      </div>
+      <div className="mt-6 flex justify-between w-full max-w-md">
+        <button
           onClick={handleAgendarConsulta}
-          className={`w-full py-3 ${loadingAgendamento ? "bg-gray-400" : "bg-white"} text-cyan-500 font-semibold rounded-lg shadow-md hover:bg-cyan-500 hover:text-white transition duration-200`}
-          whileHover={{ scale: 1.05 }}
+          className="w-full p-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-semibold transition-colors"
           disabled={loadingAgendamento}
         >
-          {loadingAgendamento ? <BeatLoader size={10} color="#039b17" /> : "AGENDAR CONSULTA"}
-        </motion.button>
+          {loadingAgendamento ? (
+            <BeatLoader size={8} color="#fff" />
+          ) : (
+            "Agendar"
+          )}
+        </button>
       </div>
-
-      
+      <ToastContainer /> 
+      {modalAberto && (
+        <div className="fixed inset-0 flex items-center justify-center  bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+            <h2 className="text-lg text-black font-bold">
+              Consulta Agendada com Sucesso!
+            </h2>
+            <p className="mt-2 text-black">O que você gostaria de fazer agora?</p>
+            <div className="flex justify-around mt-3 ">
+              <button
+                onClick={irParaMeusAgendamentos}
+                className="bg-green-500 mr-3 text-white font-semibold py-2  px-4 rounded-lg hover:bg-green-600 transition duration-200"
+              >
+                Meus Agendamentos
+              </button>
+              <button
+                onClick={marcarOutraConsulta}
+                className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+              >
+                Marcar Outra Consulta
+              </button>
+            </div>
+            <button
+              onClick={fecharModal}
+              className="mt-4 text-white bg-red-600 rounded-md p-1 font-bold hover:bg-red-700"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
       {loadingPagina && (
         <div className="absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-60 flex items-center justify-center z-50">
           <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-900 animate-pulse font-roboto">

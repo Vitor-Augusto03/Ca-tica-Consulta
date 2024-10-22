@@ -1,8 +1,6 @@
-import React, {useEffect} from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Testimonials from "../components/Testimonials";
-import useAuth from "../hooks/useAuth";
 import Navbar from "../components/Navbar"
 
 
@@ -104,15 +102,8 @@ const FloatingPharmacyIcons = () => {
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  useEffect(() => {
-    // Se o usuário não estiver autenticado, redirecionar para a página de login
-    if (!user) {
-      navigate("/signin");
-    }
-  }, [user, navigate]);
-
-
+ 
+  
   const handleAgendar = () => {
     navigate("/agendar");
   };
