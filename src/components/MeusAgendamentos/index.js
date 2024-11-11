@@ -4,9 +4,8 @@ import { fetchApi } from "../../lib/utils";
 import Navbar from "../Navbar";
 import { format } from "date-fns"; // Importa a função de formatação de data
 import { ClipLoader } from "react-spinners";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MeusAgendamentos = () => {
   const [agendamentos, setAgendamentos] = useState([]);
@@ -45,19 +44,19 @@ const MeusAgendamentos = () => {
       "Você realmente deseja cancelar este agendamento?"
     );
     if (!confirmCancel) return;
-  
+
     setLoading(true); // Ativar o loader
-  
+
     try {
       // Fazer requisição para atualizar o status para "Cancelado"
       await fetchApi(`api/agendamentos/${id}`, "PATCH", {
         status: "Cancelado",
       });
-  
+
       // Re-fetch agendamentos após o cancelamento
       await fetchAgendamentos();
       console.log("Agendamentos após cancelamento:", agendamentos);
-      
+
       // Exibir notificação de sucesso
       toast.success("Agendamento cancelado com sucesso!", {
         position: "top-right",
@@ -71,7 +70,7 @@ const MeusAgendamentos = () => {
       setLoading(false); // Desativar o loader
     }
   };
-  
+
   // Filtrando agendamentos com base no termo de pesquisa e no status
   const filteredAgendamentos = agendamentos.filter((agendamento) => {
     console.log("Agendamento atual:", agendamento); // Verificar cada agendamento
@@ -138,7 +137,7 @@ const MeusAgendamentos = () => {
         {/* Adicione mais opções de status conforme necessário */}
       </select>
 
-      <div className="w-full bg-white p-10  md:w-1/3 mt-10 overflow-y-auto max-h-96 border-none rounded-lg ">
+      <div className="w-full bg-white p-10  md:w-1/3 mt-10  overflow-y-auto max-h-96 border-none rounded-lg ">
         {loading ? (
           <p className="flex justify-center items-center min-h-screen">
             <ClipLoader size={20} color="#039b17" />
@@ -151,30 +150,30 @@ const MeusAgendamentos = () => {
           filteredAgendamentos.map((agendamento) => (
             <div
               key={agendamento.id}
-              className="border hover:bg-gray-100 border-green-300 p-4 mr-2 mb-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="border hover:bg-gray-100 border-green-300 p-4 mr-2 mb-4  bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
             >
-              {agendamento.medico ? (
-                <>
+              {agendamento.medico && agendamento.medico.nome ? (
+                <div>
                   <p className="text-gray-600">
                     <strong>Médico:</strong> {agendamento.medico.nome}
                   </p>
                   <p className="text-gray-600">
                     <strong>Especialidade:</strong>{" "}
-                    {agendamento.medico.especialidade}
+                    {agendamento.medico.especialidade.nome ||
+                      "Não especificada"}
                   </p>
-                </>
+                </div>
               ) : (
                 <p className="text-gray-600">
                   <strong>Médico:</strong> Informação não disponível
                 </p>
               )}
 
-              {/* Verificação mais robusta para o paciente */}
-              {agendamento.paciente ? (
+              {agendamento.paciente && agendamento.paciente.nome ? (
                 <p className="text-gray-600">
-                  <strong>Paciente:</strong>{" "}
-                  {agendamento.paciente.nome || "Nome não disponível"}
+                  <strong>Paciente:</strong> {agendamento.paciente.nome}
                 </p>
+
               ) : (
                 <p className="text-gray-600">
                   <strong>Paciente:</strong> Informação não disponível
@@ -189,10 +188,10 @@ const MeusAgendamentos = () => {
                 <strong>Horário:</strong> {agendamento.horario}
               </p>
               <p
-                className={`text-${
+                className={`${
                   agendamento.status === "Cancelado"
-                    ? "red-600 font-bold"
-                    : "green-700 font-bold"
+                    ? "text-red-600 font-bold"
+                    : "text-green-700 font-bold"
                 }`}
               >
                 <strong className="text-gray-600 font-bold">Status:</strong>{" "}
@@ -221,4 +220,5 @@ const MeusAgendamentos = () => {
     </motion.div>
   );
 };
+
 export default MeusAgendamentos;

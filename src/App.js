@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'; // Importando o CSS do Toastify
 
 const App = () => (
   <>
-    <ToastContainer /> 
+    <ToastContainer/> 
     <RoutesApp />
   </>
 );

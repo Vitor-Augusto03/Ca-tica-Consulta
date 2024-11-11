@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const AgendarConsulta = () => {
   const [medicos, setMedicos] = useState([]);
-  const [especialidade, setEspecialidade] = useState("");
+  const [medico, setMedico] = useState("");
   const [nomePaciente, setNomePaciente] = useState("");
   const [cpfPaciente, setCpfPaciente] = useState("");
   const [dataConsulta, setDataConsulta] = useState("");
@@ -90,7 +90,7 @@ const AgendarConsulta = () => {
       !cpfPaciente ||
       !dataConsulta ||
       !horarioConsulta ||
-      !especialidade
+      !medico
     ) {
       toast.error("Por favor, preencha todos os campos.", {
         position: "top-right",
@@ -117,7 +117,7 @@ const AgendarConsulta = () => {
           body: JSON.stringify({
             nome: nomePaciente,
             cpf: cpfPaciente,
-            medicoId: especialidade,
+            medicoId: medico,
             data: dataConsulta,
             horario: horarioConsulta,
             status: "Confirmado",
@@ -148,11 +148,25 @@ const AgendarConsulta = () => {
   };
 
   const handleCpfChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-    if (value.length <= 11) {
+    let value = e.target.value.replace(/\D/g, ""); // Remove todos os caracteres não numéricos
+    if (value.length <= 11) { // Limita o CPF para 11 dígitos
+      // Formatar o CPF para o formato xxx.xxx.xxx-xx
+      if (value.length <= 3) {
+        value = value.replace(/(\d{3})(\d{0,})/, "$1.$2");
+      } else if (value.length <= 6) {
+        value = value.replace(/(\d{3})(\d{3})(\d{0,})/, "$1.$2.$3");
+      } else if (value.length <= 9) {
+        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{0,})/, "$1.$2.$3-$4");
+      } else {
+        // Quando o CPF tiver 11 dígitos, aplique o formato completo
+        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+      }
       setCpfPaciente(value);
     }
   };
+  
+  
+  
 
   const fecharModal = () => {
     setModalAberto(false);
@@ -168,12 +182,12 @@ const AgendarConsulta = () => {
     setCpfPaciente("");
     setDataConsulta("");
     setHorarioConsulta("");
-    setEspecialidade("");
+    setMedico("");
   };
 
   return (
     <motion.div
-      className="flex flex-col items-center justify-center min-h-screen bg-green-800 p-8 relative"
+      className="flex flex-col   items-center justify-center min-h-screen bg-green-800 p-8 relative"
       initial={{ opacity: 0, x: -100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 100 }}
@@ -183,7 +197,7 @@ const AgendarConsulta = () => {
       <h1 className="text-4xl font-extrabold text-white mb-8">
         Agendar Consulta
       </h1>
-      <div className="flex flex-col text-gray-100 font-semibold space-y-4 w-full max-w-md">
+      <div className="flex flex-col border-b-2 border-green-400 shadow-2xl placeholder:font-light  bg-green-700 rounded-lg  p-8  text-gray-100 font-light space-y-4 w-full max-w-md">
         <label>
           SEU NOME:
           <input
@@ -200,7 +214,7 @@ const AgendarConsulta = () => {
                 .join(" ");
               setNomePaciente(valor);
             }}
-            className="w-full font-normal text-black p-2 mt-1 border rounded-lg border-gray-300 focus:outline-none "
+            className="w-full text-black p-2 mt-1  rounded-lg  focus:outline-none "
           />
         </label>
 
@@ -210,8 +224,7 @@ const AgendarConsulta = () => {
             type="text"
             value={cpfPaciente}
             onChange={handleCpfChange}
-            maxLength={11}
-            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
+           className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
           />
         </label>
 
@@ -223,17 +236,17 @@ const AgendarConsulta = () => {
             </div>
           ) : (
             <select
-              onChange={(e) => setEspecialidade(e.target.value)}
-              value={especialidade}
-              className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
-            >
-              <option value="">Selecione um médico</option>
-              {medicos.map((medico) => (
-                <option key={medico.id} value={medico.id}>
-                  {medico.nome} - {medico.especialidade}
-                </option>
-              ))}
-            </select>
+            onChange={(e) => setMedico(e.target.value)}
+            value={medico}
+            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
+          >
+            <option value="">Selecione um médico</option>
+            {medicos.map((medico) => (
+              <option key={medico.id} value={medico.id}>
+                {medico.nome} - {medico.especialidade.nome} {/* Acessa o nome da especialidade */}
+              </option>
+            ))}
+          </select>
           )}
         </label>
 
@@ -258,7 +271,7 @@ const AgendarConsulta = () => {
           <select
             onChange={(e) => setHorarioConsulta(e.target.value)}
             value={horarioConsulta}
-            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300  "
           >
             <option value="">Selecione um horário</option>
             {sugestoes
