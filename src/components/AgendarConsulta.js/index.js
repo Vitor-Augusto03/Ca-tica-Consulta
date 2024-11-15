@@ -71,8 +71,9 @@ const AgendarConsulta = () => {
   }, []);
 
   const validarCPF = (cpf) => {
+    const cpfSemFormatacao = cpf.replace(/\D/g, ""); // Remove todos os caracteres não numéricos
     const regex = /^\d{11}$/;
-    return regex.test(cpf);
+    return regex.test(cpfSemFormatacao);
   };
 
   const formatarData = (dataISO) => {
@@ -104,7 +105,6 @@ const AgendarConsulta = () => {
       });
       return;
     }
-
     setLoadingAgendamento(true);
     try {
       const responseAgendamento = await fetch(
@@ -149,7 +149,8 @@ const AgendarConsulta = () => {
 
   const handleCpfChange = (e) => {
     let value = e.target.value.replace(/\D/g, ""); // Remove todos os caracteres não numéricos
-    if (value.length <= 11) { // Limita o CPF para 11 dígitos
+    if (value.length <= 11) {
+      // Limita o CPF para 11 dígitos
       // Formatar o CPF para o formato xxx.xxx.xxx-xx
       if (value.length <= 3) {
         value = value.replace(/(\d{3})(\d{0,})/, "$1.$2");
@@ -164,9 +165,6 @@ const AgendarConsulta = () => {
       setCpfPaciente(value);
     }
   };
-  
-  
-  
 
   const fecharModal = () => {
     setModalAberto(false);
@@ -224,7 +222,7 @@ const AgendarConsulta = () => {
             type="text"
             value={cpfPaciente}
             onChange={handleCpfChange}
-           className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
+            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
           />
         </label>
 
@@ -236,17 +234,18 @@ const AgendarConsulta = () => {
             </div>
           ) : (
             <select
-            onChange={(e) => setMedico(e.target.value)}
-            value={medico}
-            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
-          >
-            <option value="">Selecione um médico</option>
-            {medicos.map((medico) => (
-              <option key={medico.id} value={medico.id}>
-                {medico.nome} - {medico.especialidade.nome} {/* Acessa o nome da especialidade */}
-              </option>
-            ))}
-          </select>
+              onChange={(e) => setMedico(e.target.value)}
+              value={medico}
+              className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
+            >
+              <option value="">Selecione um médico</option>
+              {medicos.map((medico) => (
+                <option key={medico.id} value={medico.id}>
+                  {medico.nome} - {medico.especialidade.nome}{" "}
+                  {/* Acessa o nome da especialidade */}
+                </option>
+              ))}
+            </select>
           )}
         </label>
 
@@ -271,7 +270,7 @@ const AgendarConsulta = () => {
           <select
             onChange={(e) => setHorarioConsulta(e.target.value)}
             value={horarioConsulta}
-            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300  "
+            className="w-full p-2 mt-1 text-black border rounded-lg border-gray-300 focus:outline-none "
           >
             <option value="">Selecione um horário</option>
             {sugestoes
@@ -297,14 +296,28 @@ const AgendarConsulta = () => {
           )}
         </button>
       </div>
-      <ToastContainer /> 
+      <ToastContainer />
       {modalAberto && (
-        <div className="fixed inset-0 flex items-center justify-center  bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+          initial={{ opacity: 0, y: -50 }} // Começa invisível e um pouco acima
+          animate={{ opacity: 1, y: 0 }} // Fica visível e no lugar
+          exit={{ opacity: 0, y: 50 }} // Ao sair, fica invisível e desce um pouco
+          transition={{ duration: 0.3 }} // Duração da animação
+        >
+          <motion.div
+            className="bg-white p-8 rounded-lg shadow-lg text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
             <h2 className="text-lg text-black font-bold">
               Consulta Agendada com Sucesso!
             </h2>
-            <p className="mt-2 text-black">O que você gostaria de fazer agora?</p>
+            <p className="mt-2 text-black">
+              O que você gostaria de fazer agora?
+            </p>
             <div className="flex justify-around mt-3 ">
               <button
                 onClick={irParaMeusAgendamentos}
@@ -325,9 +338,10 @@ const AgendarConsulta = () => {
             >
               Fechar
             </button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+
       {loadingPagina && (
         <div className="absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-60 flex items-center justify-center z-50">
           <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-900 animate-pulse font-roboto">
